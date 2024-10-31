@@ -1,0 +1,202 @@
+[
+  {
+    "id": "6bf9c09279d80258",
+    "type": "tab",
+    "label": "AWS S3",
+    "disabled": false,
+    "info": "",
+    "env": []
+  },
+  {
+    "id": "3370cb364e863dfc",
+    "type": "aws-s3-in",
+    "z": "6bf9c09279d80258",
+    "aws": "",
+    "bucket": "bucket",
+    "region": "eu-central-1",
+    "filepattern": "*.txt",
+    "name": "Get *.txt Files",
+    "x": 110,
+    "y": 100,
+    "wires": [
+      [
+        "3b79547fb3d1cb1e"
+      ]
+    ]
+  },
+  {
+    "id": "e02e472cb56ae101",
+    "type": "comment",
+    "z": "6bf9c09279d80258",
+    "name": "GET All *.txt FILES FROM BUCKET",
+    "info": "",
+    "x": 180,
+    "y": 60,
+    "wires": []
+  },
+  {
+    "id": "3b79547fb3d1cb1e",
+    "type": "debug",
+    "z": "6bf9c09279d80258",
+    "name": "debug 1",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 460,
+    "y": 100,
+    "wires": []
+  },
+  {
+    "id": "8d8007b38d51681f",
+    "type": "aws-s3-handle",
+    "z": "6bf9c09279d80258",
+    "aws": "",
+    "bucket": "bucket",
+    "filename": "files/file.txt",
+    "region": "eu-central-1",
+    "name": "Get Link To File",
+    "createSignedUrl": "yes",
+    "returnBuffer": "yes",
+    "x": 300,
+    "y": 220,
+    "wires": [
+      [
+        "159677c2d4b3218d"
+      ]
+    ]
+  },
+  {
+    "id": "cc7d8de164374f35",
+    "type": "inject",
+    "z": "6bf9c09279d80258",
+    "name": "Run",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "x": 110,
+    "y": 220,
+    "wires": [
+      [
+        "8d8007b38d51681f"
+      ]
+    ]
+  },
+  {
+    "id": "6f184b1945772a7e",
+    "type": "comment",
+    "z": "6bf9c09279d80258",
+    "name": "GET Temporary Link for 5 min",
+    "info": "",
+    "x": 160,
+    "y": 180,
+    "wires": []
+  },
+  {
+    "id": "159677c2d4b3218d",
+    "type": "debug",
+    "z": "6bf9c09279d80258",
+    "name": "debug 2",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 480,
+    "y": 220,
+    "wires": []
+  },
+  {
+    "id": "0113494f6ca10a62",
+    "type": "aws-s3-out",
+    "z": "6bf9c09279d80258",
+    "aws": "",
+    "bucket": "bucket",
+    "filename": "",
+    "localFilename": "",
+    "region": "eu-central-1",
+    "name": "Save to S3",
+    "x": 470,
+    "y": 340,
+    "wires": []
+  },
+  {
+    "id": "99d05a4fe666d6f7",
+    "type": "inject",
+    "z": "6bf9c09279d80258",
+    "name": "",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "x": 120,
+    "y": 340,
+    "wires": [
+      [
+        "30bb7e05bcf79fd3"
+      ]
+    ]
+  },
+  {
+    "id": "eaa2b7c854f6c4e7",
+    "type": "comment",
+    "z": "6bf9c09279d80258",
+    "name": "SAVE FILE TO S3 BUKCET",
+    "info": "",
+    "x": 150,
+    "y": 300,
+    "wires": []
+  },
+  {
+    "id": "30bb7e05bcf79fd3",
+    "type": "function",
+    "z": "6bf9c09279d80258",
+    "name": "Prepare data",
+    "func": "msg.payload = \"Text to save in S3...\";\nmsg.filename = \"files/test_text.txt\";\n\n\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 290,
+    "y": 340,
+    "wires": [
+      [
+        "0113494f6ca10a62"
+      ]
+    ]
+  }
+]

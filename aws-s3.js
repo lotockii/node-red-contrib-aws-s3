@@ -33,7 +33,7 @@ module.exports = function(RED) {
         this.skiptlsverify = n.skiptlsverify;
     }
 
-    RED.nodes.registerType("aws-config", AWSNode, {
+    RED.nodes.registerType("aws-s3-config", AWSNode, {
         credentials: {
             accesskeyid: { type: "text" },
             secretaccesskey: { type: "password" }
@@ -139,7 +139,7 @@ module.exports = function(RED) {
         });
     }
 
-    RED.nodes.registerType("amazon s3 in", AmazonS3InNode);
+    RED.nodes.registerType("aws-s3-in", AmazonS3InNode);
 
     AmazonS3InNode.prototype.filterContents = function (contents) {
         return this.filepattern ? contents.filter(e => minimatch(e.Key, this.filepattern)) : contents;
@@ -250,7 +250,7 @@ module.exports = function(RED) {
         });
     }
 
-    RED.nodes.registerType("amazon s3", AmazonS3QueryNode);
+    RED.nodes.registerType("aws-s3-handle", AmazonS3QueryNode);
 
     // Amazon S3 Out Node
     function AmazonS3OutNode(n) {
@@ -319,5 +319,5 @@ module.exports = function(RED) {
         });
     }
 
-    RED.nodes.registerType("amazon s3 out", AmazonS3OutNode);
+    RED.nodes.registerType("aws-s3-out", AmazonS3OutNode);
 };

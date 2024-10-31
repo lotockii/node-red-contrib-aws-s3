@@ -3,9 +3,9 @@
   "version": "1.0.1",
   "description": "A Node-RED node to watch, save and retreive files from an Amazon S3 bucket",
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.665.0",
-    "@aws-sdk/s3-request-presigner": "^3.665.0",
-    "minimatch": "^9.0.5",
+    "@aws-sdk/client-s3": "^3.682.0",
+    "@aws-sdk/s3-request-presigner": "^3.682.0",
+    "minimatch": "^10.0.1",
     "stream": "^0.0.3"
   },
   "main": "aws-s3.js",
@@ -22,6 +22,9 @@
     "aws-s3",
     "s3"
   ],
+  "engines": {
+    "node": ">=12.0.0"
+  },
   "node-red": {
     "version": ">=2.0.0",
     "nodes": {
