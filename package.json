@@ -17,11 +17,13 @@
     "url": "git+https://github.com/lotockii/node-red-contrib-aws-s3.git"
   },
   "keywords": [
+    "node-red",
     "aws-services",
     "aws-s3",
     "s3"
   ],
   "node-red": {
+    "version": ">=2.0.0",
     "nodes": {
       "awsS3": "aws-s3.js"
     }
