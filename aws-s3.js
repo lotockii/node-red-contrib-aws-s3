@@ -6,23 +6,62 @@ module.exports = function(RED) {
     const { S3Client, GetObjectCommand, PutObjectCommand, ListObjectsCommand } = require("@aws-sdk/client-s3");
     const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 
-    function configureS3(node, region) {
-        let credentials = {};
-        if (node.awsConfig.credentials){
-            credentials = node.awsConfig.credentials;
+    /**
+     * Получить значение из контекста (str, flow, global, env, msg)
+     */
+    function getValueFromContext(node, value, type, msg) {
+        if (value === null || value === undefined) return null;
+        try {
+            let result;
+            switch (type) {
+                case 'flow':
+                    result = node.context().flow.get(value);
+                    break;
+                case 'global':
+                    result = node.context().global.get(value);
+                    break;
+                case 'env':
+                    result = process.env[value];
+                    break;
+                case 'msg':
+                    result = RED.util.getMessageProperty(msg, value);
+                    break;
+                default:
+                    result = value;
+            }
+            return result !== undefined ? result : null;
+        } catch (err) {
+            throw new Error(`Failed to get value for type: ${type}, value: ${value}. Error: ${err.message}`);
         }
-        const options = { region: region };
-        if (node.awsConfig.endpoint) {
-            options.endpoint = node.awsConfig.endpoint;
-            options.forcePathStyle = node.awsConfig.forcepathstyle || false;
-            options.tls = !node.awsConfig.skiptlsverify;
+    }
+
+    function configureS3(node, msg) {
+        // Получаем параметры из конфигурации или контекста
+        const awsConfig = node.awsConfig;
+        const accessKeyId = getValueFromContext(node, awsConfig.accessKeyId, awsConfig.accessKeyIdType, msg);
+        const secretAccessKey = getValueFromContext(node, awsConfig.secretAccessKey, awsConfig.secretAccessKeyType, msg);
+        const useIamRole = awsConfig.useIamRole;
+        const endpoint = getValueFromContext(node, awsConfig.endpoint, awsConfig.endpointType || 'str', msg);
+        const forcePathStyle = awsConfig.forcepathstyle;
+        const skipTlsVerify = awsConfig.skiptlsverify;
+        const regionValue = getValueFromContext(node, awsConfig.region, awsConfig.regionType || 'str', msg) || awsConfig.region;
+        if (!regionValue) {
+            throw new Error('Region is missing in AWS S3 configuration');
         }
-
-        options.credentials = {
-            accessKeyId: credentials.accesskeyid,
-            secretAccessKey: credentials.secretaccesskey
-        };
-
+        const options = { region: regionValue };
+        if (endpoint) {
+            options.endpoint = endpoint;
+            options.forcePathStyle = forcePathStyle || false;
+            options.tls = !skipTlsVerify;
+        }
+        if (!useIamRole) {
+            if (accessKeyId && secretAccessKey) {
+                options.credentials = {
+                    accessKeyId,
+                    secretAccessKey
+                };
+            }
+        }
         return new S3Client(options);
     }
 
@@ -31,6 +70,14 @@ module.exports = function(RED) {
         this.endpoint = n.endpoint;
         this.forcepathstyle = n.forcepathstyle;
         this.skiptlsverify = n.skiptlsverify;
+        this.region = n.region;
+        this.regionType = n.regionType;
+        this.accessKeyId = n.accessKeyId;
+        this.accessKeyIdType = n.accessKeyIdType;
+        this.secretAccessKey = n.secretAccessKey;
+        this.secretAccessKeyType = n.secretAccessKeyType;
+        this.useIamRole = n.useIamRole;
+        this.endpointType = n.endpointType;
     }
 
     RED.nodes.registerType("aws-s3-config", AWSNode, {
@@ -44,12 +91,15 @@ module.exports = function(RED) {
     function AmazonS3InNode(n) {
         RED.nodes.createNode(this, n);
         this.awsConfig = RED.nodes.getNode(n.aws);
-        this.region = n.region || "eu-west-1";
         this.bucket = n.bucket;
+        this.bucketType = n.bucketType || 'str';
         this.filepattern = n.filepattern || "";
         const node = this;
 
-        const s3 = configureS3(this, node.region);
+        // Получаем значения bucket динамически
+        function getBucket(msg) {
+            return getValueFromContext(node, node.bucket, node.bucketType, msg);
+        }
 
         node.status({ fill: "blue", shape: "dot", text: "aws.status.initializing" });
 
@@ -72,7 +122,11 @@ module.exports = function(RED) {
             }
         };
 
-        node.listAllObjects(s3, { Bucket: node.bucket }, contents, function (err, data) {
+        // Инициализация при старте
+        const bucketValue = getBucket({});
+        const s3 = configureS3(this, msg);
+
+        node.listAllObjects(s3, { Bucket: bucketValue }, contents, function (err, data) {
             if (err) {
                 node.error(RED._("aws.error.failed-to-fetch", { err: err }));
                 node.status({ fill: "red", shape: "ring", text: "aws.status.error" });
@@ -91,13 +145,15 @@ module.exports = function(RED) {
                 node.status({ fill: "blue", shape: "dot", text: "aws.status.checking-for-changes" });
                 const contents = [];
                 try {
-                    await node.listAllObjects(s3, { Bucket: node.bucket }, contents, (err, data) => {
+                    const bucketValue = getBucket(msg);
+                    const s3 = configureS3(node, msg);
+                    await node.listAllObjects(s3, { Bucket: bucketValue }, contents, (err, data) => {
                         if (err) {
                             throw err;
                         }
                         const newContents = node.filterContents(data);
                         const seen = {};
-                        msg.bucket = node.bucket;
+                        msg.bucket = bucketValue;
                         node.state.forEach(e => { seen[e] = true; });
 
                         newContents.forEach(content => {
@@ -148,7 +204,8 @@ module.exports = function(RED) {
     // Amazon S3 Query Node
     async function handleInput(node, msg, s3) {
         try {
-            const bucket = node.bucket || msg.bucket;
+            // Получаем значения bucket динамически
+            const bucket = getValueFromContext(node, node.bucket, node.bucketType, msg) || msg.bucket;
             const filename = node.filename || msg.filename;
 
             if (!bucket) {
@@ -209,18 +266,20 @@ module.exports = function(RED) {
     function AmazonS3QueryNode(n) {
         RED.nodes.createNode(this, n);
         this.awsConfig = RED.nodes.getNode(n.aws);
-        this.region = n.region || "eu-west-1";
         this.bucket = n.bucket;
+        this.bucketType = n.bucketType || 'str';
         this.filename = n.filename || "";
         this.createSignedUrl = n.createSignedUrl || 'no';
         this.returnBuffer = n.returnBuffer || 'yes';
         this.urlExpiration = n.urlExpiration || 60;
         const node = this;
 
-        const s3 = configureS3(this, node.region);
+        function getBucket(msg) {
+            return getValueFromContext(node, node.bucket, node.bucketType, msg);
+        }
 
         node.on("input", async (msg) => {
-            const bucket = node.bucket || msg.bucket;
+            const bucket = getBucket(msg) || msg.bucket;
             const filename = node.filename || msg.filename;
 
             if (!bucket) {
@@ -236,6 +295,8 @@ module.exports = function(RED) {
             msg.bucket = bucket;
             msg.filename = filename;
 
+            const s3 = configureS3(node, msg);
+
             if (node.createSignedUrl === 'yes') {
                 try {
                     const signedUrl = await generateSignedUrl(s3, bucket, filename, node.urlExpiration || 60);
@@ -250,18 +311,17 @@ module.exports = function(RED) {
         });
     }
 
-    RED.nodes.registerType("aws-s3-handle", AmazonS3QueryNode);
+    RED.nodes.registerType('aws-s3-handle', AmazonS3QueryNode);
 
     // Amazon S3 Out Node
     function AmazonS3OutNode(n) {
         RED.nodes.createNode(this, n);
         this.awsConfig = RED.nodes.getNode(n.aws);
-        this.region = n.region || "eu-west-1";
         this.bucket = n.bucket;
         this.filename = n.filename || "";
         this.localFilename = n.localFilename || "";
         const node = this;
-        const s3 = configureS3(this, node.region);
+        const s3 = configureS3(this, msg);
 
         node.on("input", async (msg) => {
             const bucket = node.bucket || msg.bucket;

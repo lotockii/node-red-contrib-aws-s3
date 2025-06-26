@@ -4,36 +4,13 @@
           <input type="text" id="node-input-aws">
       </div>
       <div class="form-row">
-          <label for="node-input-bucket"><i class="fa fa-folder"></i> <span data-i18n="aws.label.bucket"></span></label>
-          <input type="text" id="node-input-bucket" data-i18n="[placeholder]aws.placeholder.bucket">
+          <label for="node-input-bucket-typed"><i class="fa fa-folder"></i> <span data-i18n="aws.label.bucket"></span></label>
+          <input type="text" id="node-input-bucket-typed" data-i18n="[placeholder]aws.placeholder.bucket">
+          <input type="hidden" id="node-input-bucketType">
       </div>
       <div class="form-row node-input-filepattern">
            <label for="node-input-filepattern"><i class="fa fa-file"></i> <span data-i18n="aws.label.pattern"></span></label>
            <input type="text" id="node-input-filepattern" data-i18n="[placeholder]aws.placeholder.pattern">
-      </div>
-      <div class="form-row">
-          <label for="node-input-region"><i class="fa fa-tag"></i> <span data-i18n="aws.label.region"></span></label>
-          <select type="text" id="node-input-region" style="width:70%;">
-            <option value="us-east-2">us-east-2</option>
-            <option selected value="us-east-1">us-east-1</option>
-            <option value="us-west-1">us-west-1</option>
-            <option value="us-west-2">us-west-2</option>
-            <option value="ap-south-1">ap-south-1</option>
-            <option value="ap-northeast-3">ap-northeast-3</option>
-            <option value="ap-northeast-2">ap-northeast-2</option>
-            <option value="ap-southeast-1">ap-southeast-1</option>
-            <option value="ap-southeast-2">ap-southeast-2</option>
-            <option value="ap-northeast-1">ap-northeast-1</option>
-            <option value="ca-central-1">ca-central-1</option>
-            <option value="cn-north-1">cn-north-1</option>
-            <option value="cn-northwest-1">cn-northwest-1</option>
-            <option value="eu-central-1">eu-central-1</option>
-            <option value="eu-west-1">eu-west-1</option>
-            <option value="eu-west-2">eu-west-2</option>
-            <option value="eu-west-3">eu-west-3</option>
-            <option value="eu-north-1">eu-north-1</option>
-            <option value="sa-east-1">sa-east-1</option>
-          </select>
       </div>
       <div class="form-row">
           <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="aws.label.name"></span></label>
@@ -47,7 +24,7 @@
         defaults: {
             aws: {type:"aws-s3-config",required:true},
             bucket: {value:"", required:true},
-            region: {value:"", required:true},
+            bucketType: {value:"str"},
             filepattern: {value:""},
             name: {value:""},
         },
@@ -56,6 +33,13 @@
         icon: "amazon.png",
         label: function() {
             return this.name ? this.name : "s3 " + this.bucket;
+        },
+        oneditprepare: function() {
+            prepareTypedInput("#node-input-bucket-typed", "#node-input-bucketType", this.bucket, this.bucketType);
+        },
+        oneditsave: function() {
+            this.bucket = $("#node-input-bucket-typed").typedInput('value');
+            this.bucketType = $("#node-input-bucket-typed").typedInput('type');
         }
     });
 </script>
@@ -65,36 +49,13 @@
         <input type="text" id="node-input-aws">
     </div>
     <div class="form-row">
-        <label for="node-input-bucket"><i class="fa fa-folder"></i> <span data-i18n="aws.label.bucket"></span></label>
-        <input type="text" id="node-input-bucket" data-i18n="[placeholder]aws.placeholder.bucket">
+        <label for="node-input-bucket-typed"><i class="fa fa-folder"></i> <span data-i18n="aws.label.bucket"></span></label>
+        <input type="text" id="node-input-bucket-typed" data-i18n="[placeholder]aws.placeholder.bucket">
+        <input type="hidden" id="node-input-bucketType">
     </div>
     <div class="form-row node-input-filename">
         <label for="node-input-filename"><i class="fa fa-file"></i> <span data-i18n="aws.label.filename"></span></label>
         <input type="text" id="node-input-filename" data-i18n="[placeholder]aws.placeholder.filename">
-    </div>
-    <div class="form-row">
-        <label for="node-input-region"><i class="fa fa-tag"></i> <span data-i18n="aws.label.region"></span></label>
-        <select type="text" id="node-input-region" style="width:70%;">
-            <option value="us-east-2">us-east-2</option>
-            <option selected value="us-east-1">us-east-1</option>
-            <option value="us-west-1">us-west-1</option>
-            <option value="us-west-2">us-west-2</option>
-            <option value="ap-south-1">ap-south-1</option>
-            <option value="ap-northeast-3">ap-northeast-3</option>
-            <option value="ap-northeast-2">ap-northeast-2</option>
-            <option value="ap-southeast-1">ap-southeast-1</option>
-            <option value="ap-southeast-2">ap-southeast-2</option>
-            <option value="ap-northeast-1">ap-northeast-1</option>
-            <option value="ca-central-1">ca-central-1</option>
-            <option value="cn-north-1">cn-north-1</option>
-            <option value="cn-northwest-1">cn-northwest-1</option>
-            <option value="eu-central-1">eu-central-1</option>
-            <option value="eu-west-1">eu-west-1</option>
-            <option value="eu-west-2">eu-west-2</option>
-            <option value="eu-west-3">eu-west-3</option>
-            <option value="eu-north-1">eu-north-1</option>
-            <option value="sa-east-1">sa-east-1</option>
-        </select>
     </div>
     <div class="form-row">
         <label for="node-input-createSignedUrl"><i class="fa fa-link"></i>
@@ -102,7 +63,7 @@
         </label>
         <select type="text" id="node-input-createSignedUrl" style="width:70%;">
             <option value="yes">Yes</option>
-            <option selected value="no">No</option>
+            <option value="no">No</option>
         </select>
     </div>
     <div class="form-row">
@@ -114,7 +75,7 @@
             <span data-i18n="aws.label.returnBuffer"></span>
         </label>
         <select type="text" id="node-input-returnBuffer" style="width:70%;">
-            <option selected value="yes">Yes</option>
+            <option value="yes">Yes</option>
             <option value="no">No</option>
         </select>
     </div>
@@ -130,8 +91,8 @@
         defaults: {
             aws: {type:"aws-s3-config",required:true},
             bucket: {value:""},
+            bucketType: {value:"str"},
             filename: {value:""},
-            region: {value:"", required:true},
             name: {value:""},
             createSignedUrl: {value:"no"},
             returnBuffer: {value:"yes"},
@@ -142,6 +103,17 @@
         align: "right",
         label: function() {
             return this.name ? this.name : "s3 "+this.bucket;
+        },
+        oneditprepare: function() {
+            prepareTypedInput("#node-input-bucket-typed", "#node-input-bucketType", this.bucket, this.bucketType);
+            if (this.urlExpiration !== undefined) {
+                $("#node-input-urlExpiration").val(this.urlExpiration);
+            }
+        },
+        oneditsave: function() {
+            this.bucket = $("#node-input-bucket-typed").typedInput('value');
+            this.bucketType = $("#node-input-bucket-typed").typedInput('type');
+            this.urlExpiration = $("#node-input-urlExpiration").val();
         }
     });
 </script>
@@ -151,8 +123,9 @@
           <input type="text" id="node-input-aws">
       </div>
       <div class="form-row">
-          <label for="node-input-bucket"><i class="fa fa-folder"></i> <span data-i18n="aws.label.bucket"></span></label>
-          <input type="text" id="node-input-bucket" data-i18n="[placeholder]aws.placeholder.bucket">
+          <label for="node-input-bucket-typed"><i class="fa fa-folder"></i> <span data-i18n="aws.label.bucket"></span></label>
+          <input type="text" id="node-input-bucket-typed" data-i18n="[placeholder]aws.placeholder.bucket">
+          <input type="hidden" id="node-input-bucketType">
       </div>
       <div class="form-row node-input-filename">
            <label for="node-input-filename"><i class="fa fa-file"></i> <span data-i18n="aws.label.filename"></span></label>
@@ -161,30 +134,6 @@
       <div class="form-row node-input-localFilename">
            <label for="node-input-localFilename"><i class="fa fa-file"></i> <span data-i18n="aws.label.local"></span></label>
            <input type="text" id="node-input-localFilename" data-i18n="[placeholder]aws.placeholder.local">
-      </div>
-      <div class="form-row">
-          <label for="node-input-region"><i class="fa fa-tag"></i> <span data-i18n="aws.label.region"></span></label>
-          <select type="text" id="node-input-region" style="width:70%;">
-            <option value="us-east-2">us-east-2</option>
-            <option selected value="us-east-1">us-east-1</option>
-            <option value="us-west-1">us-west-1</option>
-            <option value="us-west-2">us-west-2</option>
-            <option value="ap-south-1">ap-south-1</option>
-            <option value="ap-northeast-3">ap-northeast-3</option>
-            <option value="ap-northeast-2">ap-northeast-2</option>
-            <option value="ap-southeast-1">ap-southeast-1</option>
-            <option value="ap-southeast-2">ap-southeast-2</option>
-            <option value="ap-northeast-1">ap-northeast-1</option>
-            <option value="ca-central-1">ca-central-1</option>
-            <option value="cn-north-1">cn-north-1</option>
-            <option value="cn-northwest-1">cn-northwest-1</option>
-            <option value="eu-central-1">eu-central-1</option>
-            <option value="eu-west-1">eu-west-1</option>
-            <option value="eu-west-2">eu-west-2</option>
-            <option value="eu-west-3">eu-west-3</option>
-            <option value="eu-north-1">eu-north-1</option>
-            <option value="sa-east-1">sa-east-1</option>
-          </select>
       </div>
       <div class="form-row">
           <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="aws.label.name"></span></label>
@@ -198,9 +147,9 @@
         defaults: {
             aws: {type:"aws-s3-config",required:true},
             bucket: {value:""},
+            bucketType: {value:"str"},
             filename: {value:""},
             localFilename: {value:""},
-            region: {value:"", required:true},
             name: {value:""}
         },
         inputs:1,
@@ -209,62 +158,164 @@
         align: "right",
         label: function() {
             return this.name ? this.name : "s3 " + this.bucket;
+        },
+        oneditprepare: function() {
+            prepareTypedInput("#node-input-bucket-typed", "#node-input-bucketType", this.bucket, this.bucketType);
+        },
+        oneditsave: function() {
+            this.bucket = $("#node-input-bucket-typed").typedInput('value');
+            this.bucketType = $("#node-input-bucket-typed").typedInput('type');
         }
     });
 </script>
 <script type="text/x-red" data-template-name="aws-s3-config">
     <div class="form-row">
-          <label for="node-config-input-configname"><i class="fa fa-bookmark"></i> <span data-i18n="aws.label.configname"></span></label>
-          <input class="input-append-left" type="text" id="node-config-input-configname" style="width: 40%;" >
-      </div>
+        <label for="node-config-input-configname"><i class="fa fa-bookmark"></i> <span data-i18n="aws.label.configname"></span></label>
+        <input class="input-append-left" type="text" id="node-config-input-configname" style="width: 40%;" >
+    </div>
     <div class="form-row">
-          <label for="node-config-input-accesskeyid"><i class="fa fa-bookmark"></i> <span data-i18n="aws.label.keyid"></span></label>
-          <input class="input-append-left" type="text" id="node-config-input-accesskeyid" style="width: 40%;" >
-      </div>
-      <div class="form-row">
-          <label for="node-config-input-secretaccesskey"><i class="fa fa-bookmark"></i> <span data-i18n="aws.label.secret"></span></label>
-          <input class="input-append-left" type="password" id="node-config-input-secretaccesskey" style="width: 40%;" >
-      </div>
-      <div class="form-tips">
-          <span data-i18n="[html]aws.tip.config1"></span>
-          <span data-i18n="[html]aws.tip.config2"></span>
-      </div>
-     <div class="form-row">
-          <label for="node-config-input-endpoint"><i class="fa fa-tag"></i> <span data-i18n="aws.label.endpoint"></span></label>
-          <input class="input-append-left" type="text" id="node-config-input-endpoint">
-      </div>
-     <div class="form-row">
-          <label for="node-config-input-forcepathstyle"><i class="fa fa-tag"></i> <span data-i18n="aws.label.forcepathstyle"></span></label>
-          <input class="input-append-left" type="checkbox" id="node-config-input-forcepathstyle">
-      </div>
-     <div class="form-row">
-          <label for="node-config-input-skiptlsverify"><i class="fa fa-tag"></i> <span data-i18n="aws.label.skiptlsverify"></span></label>
-          <input class="input-append-left" type="checkbox" id="node-config-input-skiptlsverify">
-      </div>
-      <div class="form-tips">
-          <span data-i18n="[html]aws.tip.config3"></span>
-          <span data-i18n="[html]aws.tip.config4"></span>
-      </div>
+        <input type="checkbox" id="node-config-input-useIamRole" style="width: auto; margin-right: 8px;">
+        <label for="node-config-input-useIamRole" style="display: inline; font-weight: 500;">
+            Use IAM Role for authentication
+        </label>
+    </div>
+    <div class="form-row">
+        <span style="color: #888; font-size: 0.90em;">Recommended for EC2/ECS/Lambda.</span><br/>
+        <span style="color: #888; font-size: 0.90em;">When enabled, credentials fields are ignored and AWS SDK will use the instance IAM role.</span>
+    </div>
+    <div class="credentials-fields">
+        <div class="form-row">
+            <label for="node-config-input-accessKeyId-typed"><i class="fa fa-bookmark"></i> <span data-i18n="aws.label.keyid"></span></label>
+            <input type="text" id="node-config-input-accessKeyId-typed" style="width: 70%;">
+            <input type="hidden" id="node-config-input-accessKeyIdType">
+        </div>
+        <div class="form-row">
+            <label for="node-config-input-secretAccessKey-typed"><i class="fa fa-bookmark"></i> <span data-i18n="aws.label.secret"></span></label>
+            <input type="password" id="node-config-input-secretAccessKey-typed" style="width: 70%;">
+            <input type="hidden" id="node-config-input-secretAccessKeyType">
+        </div>
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-region-typed"><i class="fa fa-tag"></i> <span data-i18n="aws.label.region"></span></label>
+        <input type="text" id="node-config-input-region-typed" style="width: 70%;">
+        <input type="hidden" id="node-config-input-regionType">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-endpoint-typed"><i class="fa fa-tag"></i> <span data-i18n="aws.label.endpoint"></span></label>
+        <input type="text" id="node-config-input-endpoint-typed" style="width: 70%;">
+        <input type="hidden" id="node-config-input-endpointType">
+    </div>
+    <div class="form-tips">
+        <span data-i18n="[html]aws.tip.config1"></span>
+        <span data-i18n="[html]aws.tip.config2"></span>
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-forcepathstyle"><i class="fa fa-tag"></i> <span data-i18n="aws.label.forcepathstyle"></span></label>
+        <input class="input-append-left" type="checkbox" id="node-config-input-forcepathstyle">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-skiptlsverify"><i class="fa fa-tag"></i> <span data-i18n="aws.label.skiptlsverify"></span></label>
+        <input class="input-append-left" type="checkbox" id="node-config-input-skiptlsverify">
+    </div>
+    <div class="form-tips">
+        <span data-i18n="[html]aws.tip.config3"></span>
+        <span data-i18n="[html]aws.tip.config4"></span>
+    </div>
 </script>
 <script type="text/javascript">
     (function() {
-
         RED.nodes.registerType('aws-s3-config',{
             category: 'config',
             defaults: {
-                endpoint: {value: "",required:false},
-                forcepathstyle: {value: false},
-                skiptlsverify: { value: false },
-                configname: { value: "AWS-S3" }
+                configname: {value:"", required:true},
+                endpoint: {value:""},
+                endpointType: {value:"str"},
+                forcepathstyle: {value:false},
+                skiptlsverify: {value:false},
+                useIamRole: {value:false},
+                accessKeyId: {value:""},
+                accessKeyIdType: {value:"str"},
+                secretAccessKey: {value:""},
+                secretAccessKeyType: {value:"str"},
+                region: {value:"eu-west-1"},
+                regionType: {value:"str"}
             },
             credentials: {
-                accesskeyid: {type:"text",required:true},
-                secretaccesskey: {type: "password",required:true},
+                accesskeyid: {type:"text"},
+                secretaccesskey: {type:"password"}
             },
             label: function() {
-                return this.configname ? this.configname : this.credentials.accesskeyid;
+                return this.configname;
             },
-            exportable: false,
+            oneditprepare: function() {
+                // typedInput types
+                var stdTypes = ['str', 'flow', 'global', 'env', 'msg'];
+                // accessKeyId
+                $("#node-config-input-accessKeyId-typed").typedInput({
+                    default: 'str',
+                    types: stdTypes,
+                    typeField: "#node-config-input-accessKeyIdType"
+                });
+                $("#node-config-input-accessKeyId-typed").typedInput('type', this.accessKeyIdType || 'str');
+                $("#node-config-input-accessKeyId-typed").typedInput('value', this.accessKeyId || '');
+                // secretAccessKey
+                $("#node-config-input-secretAccessKey-typed").typedInput({
+                    default: 'str',
+                    types: stdTypes,
+                    typeField: "#node-config-input-secretAccessKeyType"
+                });
+                $("#node-config-input-secretAccessKey-typed").typedInput('type', this.secretAccessKeyType || 'str');
+                $("#node-config-input-secretAccessKey-typed").typedInput('value', this.secretAccessKey || '');
+                // region
+                $("#node-config-input-region-typed").typedInput({
+                    default: 'str',
+                    types: stdTypes,
+                    typeField: "#node-config-input-regionType"
+                });
+                $("#node-config-input-region-typed").typedInput('type', this.regionType || 'str');
+                $("#node-config-input-region-typed").typedInput('value', this.region || '');
+                // endpoint
+                $("#node-config-input-endpoint-typed").typedInput({
+                    default: 'str',
+                    types: stdTypes,
+                    typeField: "#node-config-input-endpointType"
+                });
+                $("#node-config-input-endpoint-typed").typedInput('type', this.endpointType || 'str');
+                $("#node-config-input-endpoint-typed").typedInput('value', this.endpoint || '');
+                // IAM Role logic
+                $("#node-config-input-useIamRole").on("change", function() {
+                    if ($(this).is(":checked")) {
+                        $(".credentials-fields").hide();
+                    } else {
+                        $(".credentials-fields").show();
+                    }
+                });
+                if ($("#node-config-input-useIamRole").is(":checked")) {
+                    $(".credentials-fields").hide();
+                }
+            },
+            oneditsave: function() {
+                this.accessKeyId = $("#node-config-input-accessKeyId-typed").typedInput('value');
+                this.accessKeyIdType = $("#node-config-input-accessKeyId-typed").typedInput('type');
+                this.secretAccessKey = $("#node-config-input-secretAccessKey-typed").typedInput('value');
+                this.secretAccessKeyType = $("#node-config-input-secretAccessKey-typed").typedInput('type');
+                this.region = $("#node-config-input-region-typed").typedInput('value');
+                this.regionType = $("#node-config-input-region-typed").typedInput('type');
+                this.endpoint = $("#node-config-input-endpoint-typed").typedInput('value');
+                this.endpointType = $("#node-config-input-endpoint-typed").typedInput('type');
+            }
         });
     })();
+</script>
+<script type="text/javascript">
+    var stdTypes = ['str', 'flow', 'global', 'env', 'msg'];
+    function prepareTypedInput(selector, typeSelector, value, type) {
+        $(selector).typedInput({
+            default: 'str',
+            types: stdTypes,
+            typeField: typeSelector
+        });
+        $(selector).typedInput('type', type || 'str');
+        $(selector).typedInput('value', value || '');
+    }
 </script>
