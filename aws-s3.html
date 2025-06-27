@@ -4,13 +4,20 @@
           <input type="text" id="node-input-aws">
       </div>
       <div class="form-row">
-          <label for="node-input-bucket-typed"><i class="fa fa-folder"></i> <span data-i18n="aws.label.bucket"></span></label>
-          <input type="text" id="node-input-bucket-typed" data-i18n="[placeholder]aws.placeholder.bucket">
+          <label for="node-input-bucket"><i class="fa fa-folder"></i> <span data-i18n="aws.label.bucket"></span></label>
+          <input type="text" id="node-input-bucket" style="width: 70%;">
           <input type="hidden" id="node-input-bucketType">
       </div>
       <div class="form-row node-input-filepattern">
            <label for="node-input-filepattern"><i class="fa fa-file"></i> <span data-i18n="aws.label.pattern"></span></label>
            <input type="text" id="node-input-filepattern" data-i18n="[placeholder]aws.placeholder.pattern">
+      </div>
+      <div class="form-row">
+          <label for="node-input-pollingInterval"><i class="fa fa-clock-o"></i> Polling Interval (seconds)</label>
+          <input type="number" id="node-input-pollingInterval" placeholder="900" min="30" step="1">
+      </div>
+      <div class="form-row">
+          <span style="color: #888; font-size: 0.90em;">Minimum 30 seconds. Default is 900 seconds (15 minutes).</span>
       </div>
       <div class="form-row">
           <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="aws.label.name"></span></label>
@@ -23,10 +30,11 @@
         color:"#ff7919",
         defaults: {
             aws: {type:"aws-s3-config",required:true},
-            bucket: {value:"", required:true},
+            bucket: {value:""},
             bucketType: {value:"str"},
             filepattern: {value:""},
             name: {value:""},
+            pollingInterval: {value:900}
         },
         inputs:0,
         outputs:1,
@@ -35,11 +43,25 @@
             return this.name ? this.name : "s3 " + this.bucket;
         },
         oneditprepare: function() {
-            prepareTypedInput("#node-input-bucket-typed", "#node-input-bucketType", this.bucket, this.bucketType);
+            $("#node-input-bucket").typedInput({
+                default: 'str',
+                types: ['str', 'msg', 'flow', 'global', 'env'],
+                typeField: "#node-input-bucketType"
+            });
+            $("#node-input-bucket").typedInput('type', this.bucketType || 'str');
+            $("#node-input-bucket").typedInput('value', this.bucket || '');
+            
+            // Устанавливаем значение pollingInterval
+            $("#node-input-pollingInterval").val(this.pollingInterval || 900);
         },
         oneditsave: function() {
-            this.bucket = $("#node-input-bucket-typed").typedInput('value');
-            this.bucketType = $("#node-input-bucket-typed").typedInput('type');
+            this.bucketType = $("#node-input-bucketType").val();
+            this.bucket = $("#node-input-bucket").typedInput('value');
+            
+            // Сохраняем pollingInterval с валидацией
+            var interval = parseInt($("#node-input-pollingInterval").val()) || 900;
+            if (interval < 30) interval = 30; // Минимум 30 секунд
+            this.pollingInterval = interval;
         }
     });
 </script>
@@ -49,8 +71,8 @@
         <input type="text" id="node-input-aws">
     </div>
     <div class="form-row">
-        <label for="node-input-bucket-typed"><i class="fa fa-folder"></i> <span data-i18n="aws.label.bucket"></span></label>
-        <input type="text" id="node-input-bucket-typed" data-i18n="[placeholder]aws.placeholder.bucket">
+        <label for="node-input-bucket"><i class="fa fa-folder"></i> <span data-i18n="aws.label.bucket"></span></label>
+        <input type="text" id="node-input-bucket" style="width: 70%;">
         <input type="hidden" id="node-input-bucketType">
     </div>
     <div class="form-row node-input-filename">
@@ -105,14 +127,20 @@
             return this.name ? this.name : "s3 "+this.bucket;
         },
         oneditprepare: function() {
-            prepareTypedInput("#node-input-bucket-typed", "#node-input-bucketType", this.bucket, this.bucketType);
+            $("#node-input-bucket").typedInput({
+                default: 'str',
+                types: ['str', 'msg', 'flow', 'global', 'env'],
+                typeField: "#node-input-bucketType"
+            });
+            $("#node-input-bucket").typedInput('type', this.bucketType || 'str');
+            $("#node-input-bucket").typedInput('value', this.bucket || '');
             if (this.urlExpiration !== undefined) {
                 $("#node-input-urlExpiration").val(this.urlExpiration);
             }
         },
         oneditsave: function() {
-            this.bucket = $("#node-input-bucket-typed").typedInput('value');
-            this.bucketType = $("#node-input-bucket-typed").typedInput('type');
+            this.bucketType = $("#node-input-bucketType").val();
+            this.bucket = $("#node-input-bucket").typedInput('value');
             this.urlExpiration = $("#node-input-urlExpiration").val();
         }
     });
@@ -123,8 +151,8 @@
           <input type="text" id="node-input-aws">
       </div>
       <div class="form-row">
-          <label for="node-input-bucket-typed"><i class="fa fa-folder"></i> <span data-i18n="aws.label.bucket"></span></label>
-          <input type="text" id="node-input-bucket-typed" data-i18n="[placeholder]aws.placeholder.bucket">
+          <label for="node-input-bucket"><i class="fa fa-folder"></i> <span data-i18n="aws.label.bucket"></span></label>
+          <input type="text" id="node-input-bucket" style="width: 70%;">
           <input type="hidden" id="node-input-bucketType">
       </div>
       <div class="form-row node-input-filename">
@@ -139,6 +167,10 @@
           <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="aws.label.name"></span></label>
           <input type="text" id="node-input-name" data-i18n="[placeholder]aws.placeholder.name">
       </div>
+      <div class="form-row">
+          <input type="checkbox" id="node-input-sendOutput" style="width: auto; margin-right: 8px;">
+          <label for="node-input-sendOutput" style="display: inline; font-weight: 500;">Send output</label>
+      </div>
 </script>
 <script type="text/javascript">
     RED.nodes.registerType('aws-s3-out',{
@@ -150,7 +182,9 @@
             bucketType: {value:"str"},
             filename: {value:""},
             localFilename: {value:""},
-            name: {value:""}
+            name: {value:""},
+            sendOutput: {value:false},
+            outputs: {value:0}
         },
         inputs:1,
         outputs:0,
@@ -160,11 +194,23 @@
             return this.name ? this.name : "s3 " + this.bucket;
         },
         oneditprepare: function() {
-            prepareTypedInput("#node-input-bucket-typed", "#node-input-bucketType", this.bucket, this.bucketType);
+            $("#node-input-bucket").typedInput({
+                default: 'str',
+                types: ['str', 'msg', 'flow', 'global', 'env'],
+                typeField: "#node-input-bucketType"
+            });
+            $("#node-input-bucket").typedInput('type', this.bucketType || 'str');
+            $("#node-input-bucket").typedInput('value', this.bucket || '');
+            
+            // Устанавливаем состояние чекбокса
+            $("#node-input-sendOutput").prop("checked", this.sendOutput === true || this.sendOutput === "true");
         },
         oneditsave: function() {
-            this.bucket = $("#node-input-bucket-typed").typedInput('value');
-            this.bucketType = $("#node-input-bucket-typed").typedInput('type');
+            this.bucketType = $("#node-input-bucketType").val();
+            this.bucket = $("#node-input-bucket").typedInput('value');
+            var hasOutput = $("#node-input-sendOutput").is(":checked");
+            this.sendOutput = hasOutput;
+            this.outputs = hasOutput ? 1 : 0;
         }
     });
 </script>
@@ -248,9 +294,7 @@
                 return this.configname;
             },
             oneditprepare: function() {
-                // typedInput types
                 var stdTypes = ['str', 'flow', 'global', 'env', 'msg'];
-                // accessKeyId
                 $("#node-config-input-accessKeyId-typed").typedInput({
                     default: 'str',
                     types: stdTypes,
@@ -258,7 +302,6 @@
                 });
                 $("#node-config-input-accessKeyId-typed").typedInput('type', this.accessKeyIdType || 'str');
                 $("#node-config-input-accessKeyId-typed").typedInput('value', this.accessKeyId || '');
-                // secretAccessKey
                 $("#node-config-input-secretAccessKey-typed").typedInput({
                     default: 'str',
                     types: stdTypes,
@@ -266,7 +309,6 @@
                 });
                 $("#node-config-input-secretAccessKey-typed").typedInput('type', this.secretAccessKeyType || 'str');
                 $("#node-config-input-secretAccessKey-typed").typedInput('value', this.secretAccessKey || '');
-                // region
                 $("#node-config-input-region-typed").typedInput({
                     default: 'str',
                     types: stdTypes,
@@ -274,7 +316,6 @@
                 });
                 $("#node-config-input-region-typed").typedInput('type', this.regionType || 'str');
                 $("#node-config-input-region-typed").typedInput('value', this.region || '');
-                // endpoint
                 $("#node-config-input-endpoint-typed").typedInput({
                     default: 'str',
                     types: stdTypes,
@@ -282,7 +323,6 @@
                 });
                 $("#node-config-input-endpoint-typed").typedInput('type', this.endpointType || 'str');
                 $("#node-config-input-endpoint-typed").typedInput('value', this.endpoint || '');
-                // IAM Role logic
                 $("#node-config-input-useIamRole").on("change", function() {
                     if ($(this).is(":checked")) {
                         $(".credentials-fields").hide();
