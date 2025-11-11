@@ -302,7 +302,9 @@ module.exports = function(RED) {
         this.filename = n.filename || "";
         this.createSignedUrl = n.createSignedUrl || 'no';
         this.returnBuffer = n.returnBuffer || 'yes';
-        this.urlExpiration = n.urlExpiration || 60;
+        // Преобразуем urlExpiration в число, гарантируем минимум 1 секунду
+        const expiration = parseInt(n.urlExpiration, 10);
+        this.urlExpiration = (!isNaN(expiration) && expiration > 0) ? expiration : 60;
         const node = this;
 
         /**
@@ -364,7 +366,7 @@ module.exports = function(RED) {
             if (node.createSignedUrl === 'yes') {
                 try {
                     node.status({ fill: "blue", shape: "dot", text: "aws.status.generating-url" });
-                    const signedUrl = await generateSignedUrl(s3, bucket, filename, node.urlExpiration || 60);
+                    const signedUrl = await generateSignedUrl(s3, bucket, filename, node.urlExpiration);
                     msg.payload = signedUrl;
                     node.status({}); // Сбрасываем статус при успешном выполнении
                     node.send(msg);

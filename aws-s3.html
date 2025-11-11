@@ -118,6 +118,7 @@
             name: {value:""},
             createSignedUrl: {value:"no"},
             returnBuffer: {value:"yes"},
+            urlExpiration: {value:60}
         },
         inputs:1,
         outputs:1,
@@ -134,14 +135,19 @@
             });
             $("#node-input-bucket").typedInput('type', this.bucketType || 'str');
             $("#node-input-bucket").typedInput('value', this.bucket || '');
-            if (this.urlExpiration !== undefined) {
-                $("#node-input-urlExpiration").val(this.urlExpiration);
-            }
+            $("#node-input-urlExpiration").val(this.urlExpiration || 60);
+            
+            // Устанавливаем значения для select элементов
+            $("#node-input-createSignedUrl").val(this.createSignedUrl || 'no');
+            $("#node-input-returnBuffer").val(this.returnBuffer || 'yes');
         },
         oneditsave: function() {
             this.bucketType = $("#node-input-bucketType").val();
             this.bucket = $("#node-input-bucket").typedInput('value');
-            this.urlExpiration = $("#node-input-urlExpiration").val();
+            var expiration = parseInt($("#node-input-urlExpiration").val()) || 60;
+            this.urlExpiration = expiration;
+            this.createSignedUrl = $("#node-input-createSignedUrl").val();
+            this.returnBuffer = $("#node-input-returnBuffer").val();
         }
     });
 </script>
